@@ -52,3 +52,11 @@ tests:
     dependencies:
     - RFC5646
     - tasty
+    - tasty-discover
+    - tasty-hunit
+    - tasty-hspec
+    - tasty-quickcheck 
+    - tasty-smallcheck 
+    - lens
+    - mtl
+    - attoparsec
