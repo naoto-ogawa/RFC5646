@@ -30,6 +30,8 @@ library:
     - bytestring
     - lens
     - mtl
+  exposed-modules:
+    - RFC.RFC5646
 
 # executables:
 #   RFC5646-exe:
