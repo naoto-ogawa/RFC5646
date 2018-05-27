@@ -1,10 +1,10 @@
 name:                RFC5646
 version:             0.1.0.0
-github:              "githubuser/RFC5646"
-license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2018 Author name here"
+github:              https://github.com/naoto-ogawa/RFC5646
+license:             MIT 
+author:              Naoto Ogawa
+maintainer:          becausethespiderspiedher@gmail.com 
+copyright:           2018 Naoto Ogawa
 
 extra-source-files:
 - README.md
@@ -17,7 +17,7 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/RFC5646#readme>
+description:         Please see the README on GitHub at <https://github.com/naoto-ogawa/RFC5646#readme>
 
 dependencies:
 - base >= 4.7 && < 5
@@ -25,21 +25,22 @@ dependencies:
 library:
   source-dirs: src
   dependencies:
+    - attoparsec
     - base
+    - bytestring
     - lens
     - mtl
-    - attoparsec
 
-executables:
-  RFC5646-exe:
-    main:                Main.hs
-    source-dirs:         app
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - RFC5646
+# executables:
+#   RFC5646-exe:
+#     main:                Main.hs
+#     source-dirs:         app
+#     ghc-options:
+#     - -threaded
+#     - -rtsopts
+#     - -with-rtsopts=-N
+#     dependencies:
+#     - RFC5646
 
 tests:
   RFC5646-test:
@@ -60,3 +61,13 @@ tests:
     - lens
     - mtl
     - attoparsec
+    - bytestring
+  RFC5646-doctest:
+    main: test/doctests.hs
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - RFC5646 
+    - doctest
