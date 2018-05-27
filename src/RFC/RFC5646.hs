@@ -7,20 +7,22 @@ Maintainer  : Naoto Ogawa
 Stability   : experimental
 Portability : POSIX
 
-The parser of RFC5646
+== a  parser of RFC5646
+
 https://tools.ietf.org/html/rfc5646
 
-Features :
- Lens-enabled
- instance of Read class
-   use readMaby
- instance of Eq class
-   case insensitive equality
- support for common convention formatting
- check if a tag is valid
- check if a tag is private
+== Features
 
-Basic usage :
+* Lens-enabled
+* instance of Read class
+  *  use readMaby
+* instance of Eq class
+  * case insensitive equality
+* support for common convention formatting
+* check if a tag is valid
+* check if a tag is private
+
+== Basic usage :
 
 >>> read "de" :: LanguageTag
 Normal (Langtag {_language = ISO639 {_primary = "de", _extended = []}, _script = Nothing, _region = Nothing, _variant = [], _extension = [], _privateuse = []})
@@ -28,16 +30,16 @@ Normal (Langtag {_language = ISO639 {_primary = "de", _extended = []}, _script =
 >>> read "DE" :: LanguageTag
 Normal (Langtag {_language = ISO639 {_primary = "DE", _extended = []}, _script = Nothing, _region = Nothing, _variant = [], _extension = [], _privateuse = []})
 
-Equality :
+== Equality :
 
 >>> let l1 =read "de" :: LanguageTag
 >>> let l2 =read "DE" :: LanguageTag
 >>> l1 == l2
 True
 
-Tag Access : 
+== Tag Access : 
 
-zh-Hant (Chinese written using the Traditional Chinese script)
+=== zh-Hant (Chinese written using the Traditional Chinese script)
 
 >>> let c1 = read "zh-Hant" :: LanguageTag
 >>> c1 ^. (_Normal . language . primary)
@@ -55,7 +57,7 @@ Nothing
 >>> c1 ^. (_Normal . privateuse )
 []
 
-zh-cmn-Hans-CN (Chinese, Mandarin, Simplified script, as used in China)
+=== zh-cmn-Hans-CN (Chinese, Mandarin, Simplified script, as used in China)
 
 >>> let c2 = read "zh-cmn-Hans-CN" :: LanguageTag
 >>> c2 ^. (_Normal . language . primary)
@@ -73,7 +75,7 @@ Just "CN"
 >>> c2 ^. (_Normal . privateuse)
 []
 
-sl-rozaj-biske (San Giorgio dialect of Resian dialect of Slovenian)
+=== sl-rozaj-biske (San Giorgio dialect of Resian dialect of Slovenian)
 
 >>> let c3 = read "sl-rozaj-biske" :: LanguageTag
 >>> c3 ^. (_Normal . language . primary)
@@ -91,7 +93,7 @@ Nothing
 >>> c3 ^. (_Normal . privateuse)
 []
 
-az-Arab-x-AZE-derbend (Private use subtags)
+=== az-Arab-x-AZE-derbend (Private use subtags)
 
 >>> let c4 = read "az-Arab-x-AZE-derbend" :: LanguageTag
 >>> c4
@@ -111,9 +113,9 @@ Nothing
 >>> c4 ^. (_Normal . privateuse)
 ["x","AZE","derbend"]
 
-Privateness : 
+== Privateness : 
 
-qaa-Qaaa-QM-x-southern (all private tags)
+=== qaa-Qaaa-QM-x-southern (all private tags)
 
 >>> let c5 = read "qaa-Qaaa-QM-x-southern" :: LanguageTag
 >>> c5 & previews _Normal isPrivateOfPrimaryLanguageSubtag
@@ -123,21 +125,23 @@ Just True
 >>> c5 & previews _Normal isPrivateOfPrimaryLanguageSubtag
 Just True
 
-Shortcut :
+== Shortcut :
 
-When you know that you don't use a grandfathered tag  not a private tag at the beginning, use Langtag type insted of LanguageTag.
+When you know that you don't use a grandfathered tag nor a private tag at the beginning, use Langtag type insted of LanguageTag.
 
->>> let c2' = read "zh-cmn-Hans-CN" :: LanguageTag
->>> c2' ^. (_Normal . language . primary)
+>>> let c2' = read "zh-cmn-Hans-CN" :: Langtag
+>>> c2'
+Langtag {_language = ISO639 {_primary = "zh", _extended = ["cmn"]}, _script = Just "Hans", _region = Just "CN", _variant = [], _extension = [], _privateuse = []}
+>>> c2' ^. (language . primary)
 "zh"
->>> c2' ^. (_Normal . language . extended)
+>>> c2' ^. (language . extended)
 ["cmn"]
->>> c2' ^. (_Normal . script)
+>>> c2' ^. script
 Just "Hans"
->>> c2' ^. (_Normal . region)
+>>> c2' ^. region
 Just "CN"
 
-Safty :
+== Safty :
 
 The read function is not safe, so use readMaybe
 
