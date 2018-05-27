@@ -9,7 +9,7 @@ import Test.Tasty.Hspec
 import Data.Attoparsec.ByteString.Char8
 import qualified Data.Attoparsec.Internal.Types as T
 --
-import RFC.RFC5646
+import RFC.Internal.RFC5646
 
 --
 
@@ -51,19 +51,19 @@ spec_privateuse_ = do
     describe "test description" $ makeIts testPrivateuse_ testStr
 
 testPrivateuse = [
-    ("pPrivateuse error", pPrivateuse, "X-", ["error"])
-  , ("pPrivateuse 1", pPrivateuse, "x-1", ["1"])
-  , ("pPrivateuse 2", pPrivateuse, "x-12",  ["12"])
-  , ("pPrivateuse 3", pPrivateuse, "x-123", ["123"])
-  , ("pPrivateuse 4", pPrivateuse, "x-1234", ["1234"])
-  , ("pPrivateuse 5", pPrivateuse, "x-12345", ["12345"])
-  , ("pPrivateuse 6", pPrivateuse, "x-123456", ["123456"])
-  , ("pPrivateuse 7", pPrivateuse, "x-1234567", ["1234567"])
-  , ("pPrivateuse 8-1", pPrivateuse, "x-12345678", ["12345678"])
-  , ("pPrivateuse 8-2", pPrivateuse, "x-123456789", ["12345678"])
-  , ("pPrivateuse TODO ", pPrivateuse, "x-123-", ["123"])  -- TODO correct ?
-  , ("pPrivateuse 2 parts", pPrivateuse, "x-123-abcd", ["123","abcd"])
-  , ("pPrivateuse 3 parts", pPrivateuse, "x-1-ab-1ab", ["1","ab", "1ab"])
+      ("pPrivateuse error"   , pPrivateuse , "X-"          , ["error"])
+    , ("pPrivateuse 1"       , pPrivateuse , "x-1"         , ["x","1"])
+    , ("pPrivateuse 2"       , pPrivateuse , "x-12"        , ["x","12"])
+    , ("pPrivateuse 3"       , pPrivateuse , "x-123"       , ["x","123"])
+    , ("pPrivateuse 4"       , pPrivateuse , "x-1234"      , ["x","1234"])
+    , ("pPrivateuse 5"       , pPrivateuse , "x-12345"     , ["x","12345"])
+    , ("pPrivateuse 6"       , pPrivateuse , "x-123456"    , ["x","123456"])
+    , ("pPrivateuse 7"       , pPrivateuse , "x-1234567"   , ["x","1234567"])
+    , ("pPrivateuse 8-1"     , pPrivateuse , "x-12345678"  , ["x","12345678"])
+    , ("pPrivateuse 8-2"     , pPrivateuse , "x-123456789" , ["x","12345678"])
+    , ("pPrivateuse TODO "   , pPrivateuse , "x-123-"      , ["x","123"])  -- TODO correct ?
+    , ("pPrivateuse 2 parts" , pPrivateuse , "x-123-abcd"  , ["x","123"                      , "abcd"])
+    , ("pPrivateuse 3 parts" , pPrivateuse , "x-1-ab-1ab"  , ["x","1"                        , "ab"     , "1ab"])
   ]
 
 spec_privateuse = do
@@ -82,26 +82,26 @@ spec_singleton = do
     describe "singleton" $ makeIts testSingleton testChar
 
 testExtension = [
-    ("pExtension error 1",  pExtension, "x-aa", "error" )
-  , ("pExtension error 2",  pExtension, "x-", "error" )
-  , ("pExtension error 3",  pExtension, "a-a", "error")
-  , ("pExtension 1", pExtension, "b-123-456", "123")
-  , ("pExtension 2", pExtension, "b-123-456-xyz", "123")
+      ("pExtension error 1" , pExtension , "x-aa"          , ('E', "error") )
+    , ("pExtension error 2" , pExtension , "x-"            , ('E', "error") )
+    , ("pExtension error 3" , pExtension , "a-a"           , ('E', "error") )
+    , ("pExtension 1"       , pExtension , "b-123-456"     , ('b', "123"  ) )
+    , ("pExtension 2"       , pExtension , "b-123-456-xyz" , ('b', "123"  ) )
   ]
 
 spec_extension = do
   before getContext $ do
-    describe "extension" $ makeIts testExtension testStr
+    describe "extension" $ makeIts testExtension testCharStr
 
 pExtension2 = option [] (many' (char '-' >> pExtension))
 testExtension2 = [
-    ("pExtension2 1", pExtension2, "-b-123-c-456", ["123", "456"])
-  , ("pExtension2 2", pExtension2, "-b-123-c-456-d-xyz", ["123", "456", "xyz"])
+    ("pExtension2 1", pExtension2, "-b-123-c-456", [('b',"123"),('c',"456")])
+  , ("pExtension2 2", pExtension2, "-b-123-c-456-d-xyz", [('b',"123"),('c',"456"),('d',"xyz")])
   ]
 
 spec_extension2 = do
   before getContext $ do
-    describe "extension" $ makeIts testExtension2 testStrList
+    describe "extension" $ makeIts testExtension2 testCharStrList
 
 testVariant = [
     ("pVariant error 1",  pVariant, "", "error" )
@@ -194,24 +194,53 @@ testLangtag = [
   -- Private use subtags:
   , ("Private use subtags 1",  
      pLangtag, "de-CH-x-phonebk"
-    ,Langtag (ISO639 "de" []) Nothing (Just "CH") [] [] ["phonebk"])
+    ,Langtag (ISO639 "de" []) Nothing (Just "CH") [] [] ["x","phonebk"])
   , ("Private use subtags 2",
      pLangtag, "az-Arab-x-AZE-derbend"
-    ,Langtag (ISO639 "az" []) (Just "Arab") Nothing [] [] ["AZE", "derbend"])
---  -- Private use registry values:
---  , ("private use using the singleton 'x'",  
---     pLangtag, "x-whatever"
---    ,Langtag (ISO639 "" []) Nothing Nothing [] [] ["whatever"])
+    ,Langtag (ISO639 "az" []) (Just "Arab") Nothing [] [] ["x","AZE", "derbend"])
   -- Tags that use extensions (examples ONLY -- extensions MUST be defined by revision or update to this document, or by RFC):
   , ("extention 1",  
      pLangtag, "en-US-u-islamcal"
-    ,Langtag (ISO639 "en" []) Nothing (Just "US") [] ["islamcal"] [])
+    ,Langtag (ISO639 "en" []) Nothing (Just "US") [] [('u',"islamcal")] [])
   , ("extention 2",  
      pLangtag, "zh-CN-a-myext-x-private"
-    ,Langtag (ISO639 "zh" []) Nothing (Just "CN") [] ["myext"] ["private"])
+    ,Langtag (ISO639 "zh" []) Nothing (Just "CN") [] [('a',"myext")] ["x","private"])
   , ("extention 3",  
      pLangtag, "en-a-myext-b-another"
-    ,Langtag (ISO639 "en" []) Nothing Nothing  [] ["myext","another"] [])
+    ,Langtag (ISO639 "en" []) Nothing Nothing  [] [('a',"myext"),('b',"another")] [])
+  -- example : 2.2.7.  Private Use Subtags 
+  , ("all subtags following the singleton 'x' MUST be considered private use",  
+     pLangtag, "en-x-US"
+    ,Langtag (ISO639 "en" []) Nothing Nothing [] [] ["x","US"])
+  -- Tags that use extensions
+  , ("Tags that use extensions 1",  
+     pLangtag, "en-US-u-islamcal"
+    ,Langtag (ISO639 "en" []) Nothing (Just "US") [] [('u',"islamcal")] [])
+  , ("Tags that use extensions 2",  
+     pLangtag, "zh-CN-a-myext-x-private"
+    ,Langtag (ISO639 "zh" []) Nothing (Just "CN") [] [('a',"myext")] ["x","private"])
+  , ("Tags that use extensions 3",  
+     pLangtag, "en-a-myext-b-another"
+    ,Langtag (ISO639 "en" []) Nothing Nothing [] [('a',"myext"),('b',"another")] [])
+  -- 
+--  , ("",  
+--     pLangtag, ""
+--    ,Langtag (ISO639 "" []) (Just "") Nothing [] [] [])
+--  , ("",  
+--     pLangtag, ""
+--    ,Langtag (ISO639 "" []) (Just "") Nothing [] [] [])
+--  , ("",  
+--     pLangtag, ""
+--    ,Langtag (ISO639 "" []) (Just "") Nothing [] [] [])
+--  , ("",  
+--     pLangtag, ""
+--    ,Langtag (ISO639 "" []) (Just "") Nothing [] [] [])
+--  , ("",  
+--     pLangtag, ""
+--    ,Langtag (ISO639 "" []) (Just "") Nothing [] [] [])
+--  , ("",  
+--     pLangtag, ""
+--    ,Langtag (ISO639 "" []) (Just "") Nothing [] [] [])
 --  , ("",  
 --     pLangtag, ""
 --    ,Langtag (ISO639 "" []) (Just "") Nothing [] [] [])
@@ -224,7 +253,135 @@ spec_langtag = do
   before getContext $ do
     describe "langtag" $ makeIts testLangtag testWithError
 
+testPLanguageTag = [
+  -- Private use registry values:
+    ("private use using the singleton 'x'",  
+     pLanguageTag , "x-whatever"
+    ,Private ["x", "whatever"])
+  , ("all private tags",  
+     pLanguageTag , "qaa-Qaaa-QM-x-southern"
+    ,Normal $ Langtag (ISO639 "qaa" []) (Just "Qaaa") (Just "QM") [] [] ["x","southern"])
+  , ("German, with a private script",  
+     pLanguageTag , "de-Qaaa"
+    ,Normal $ Langtag (ISO639 "de" []) (Just "Qaaa") Nothing [] [] [])
+  , ("Serbian, Latin script, private region",  
+     pLanguageTag , "sr-Latn-QM"
+    ,Normal $ Langtag (ISO639 "sr" []) (Just "Latn") (Just "QM") [] [] [])
+  , ("Serbian, private script, for Serbia",  
+     pLanguageTag , "sr-Qaaa-RS"
+    ,Normal $ Langtag (ISO639 "sr" []) (Just "Qaaa") (Just "RS") [] [] [])
+  ] 
 
+spec_languagetag= do
+  before getContext $ do
+    describe "languageTag" $ makeIts testPLanguageTag testWithError
+
+testInvalid = [
+  -- An extension MUST follow at least a primary language subtag.
+    ("That is, a language tag cannot begin with an extension",  
+     pLanguageTag , "a-value"
+    ,"Failed reading: empty")
+  -- well-formed
+  , ("not well formed 1", pLanguageTag , "av*alue" ,"Failed reading: empty")
+  , ("not well formed 2", pLanguageTag , "1" ,"Failed reading: empty")
+  , ("not well formed 3", pLanguageTag , "abcdefghi" ,"Failed reading: empty")
+  ]
+
+spec_invalid = do
+  before getContext $ do
+    describe "languageTag" $ makeIts testInvalid testError
+
+
+testPPrivateOfPrimaryLanguageSubtag = [
+    ("", pPrivateOfPrimaryLanguageSubtag , "qaz", "qaz" )
+  , ("", pPrivateOfPrimaryLanguageSubtag , "qaa", "qaa" )
+  , ("", pPrivateOfPrimaryLanguageSubtag , "qtz", "qtz" )
+  , ("", pPrivateOfPrimaryLanguageSubtag , "otz", "error" )
+  , ("", pPrivateOfPrimaryLanguageSubtag , "quz", "error" )
+  , ("", pPrivateOfPrimaryLanguageSubtag , "qa", "error" )
+  , ("", pPrivateOfPrimaryLanguageSubtag , "qaaa", "error" )
+--  , ("",  pVariant, "aaaaa", "aaaaa" )
+  ]
+
+spec_pPrivateOfPrimaryLanguageSubtag = do
+  before getContext $ do
+    describe "spec_pPrivateOfPrimaryLanguageSubtag" $ makeIts testPPrivateOfPrimaryLanguageSubtag testStr
+
+
+spec_eqStringCI = do
+  before getContext $ do
+    describe "eqStringCI" $ do
+     it "abc-abc" $ \_-> eqStringCI "abc" "abc" `shouldBe` True
+     it "abc-ABC" $ \_-> eqStringCI "abc" "ABC" `shouldBe` True
+     it "abc-Abc" $ \_-> eqStringCI "abc" "AbC" `shouldBe` True
+     it "abc-zzz" $ \_-> eqStringCI "abc" "zzz" `shouldBe` False
+     it "abc-" $ \_-> eqStringCI "abc" ""       `shouldBe` False
+
+spec_eqStringListCI = do
+  before getContext $ do
+    describe "eqStringCI" $ do
+     it "abc-abc" $ \_-> eqStringListCI ["abc"] ["abc"] `shouldBe` True
+     it "abc-ABC" $ \_-> eqStringListCI ["abc"] ["ABC"] `shouldBe` True
+     it "abc-Abc" $ \_-> eqStringListCI ["abc"] ["AbC"] `shouldBe` True
+     it "abc-zzz" $ \_-> eqStringListCI ["abc"] ["zzz"] `shouldBe` False
+     it "abc-efg ABC-EFG" $ \_-> eqStringListCI ["abc","efg"] ["ABC","EFG"] `shouldBe` True
+     it "abc-efg ABC" $ \_-> eqStringListCI ["abc","efg"] ["ABC"] `shouldBe` False
+     it "abc-efg ABC" $ \_-> eqStringListCI ["abc","efg"] [] `shouldBe` False 
+
+spec_isDuplicate = do
+  before getContext $ do
+    describe "isDuplicate" $ do
+     it "aa-bb-cc" $ \_-> isDuplicate ["aa", "bb", "cc"] `shouldBe` False
+     it "empty" $ \_-> isDuplicate ([] :: [String]) `shouldBe` False
+     it "aa" $ \_-> isDuplicate ["aa"] `shouldBe` False
+     it "aa-bb-aa" $ \_-> isDuplicate ["aa", "bb", "aa"] `shouldBe` True
+
+
+testformat = [
+    ("country", "aa", "aa")
+  , ("country", "BB", "bb")
+  , ("country", "Cc", "cc")
+  , ("country", "dD", "dd")
+  , ("country", "aaa", "aaa")
+  , ("country", "BBB", "bbb") -- https://www.loc.gov/standards/iso639-2/faq.html FAQ 21
+  , ("script", "AA-xyyy", "aa-Xyyy") 
+  , ("script", "AA-xYYY", "aa-Xyyy") 
+  , ("region" , "AA-xx", "aa-XX") 
+  , ("region" , "AA-xX", "aa-XX") 
+  , ("region" , "AA-Xx", "aa-XX") 
+  , ("region" , "AA-XX", "aa-XX") 
+  , ("region" , "AA-xx", "aa-XX") 
+  , ("region" , "AA-123", "aa-123") 
+  , ("rule base" , "EN-ca-X-ca", "en-CA-x-ca") 
+  , ("rule base" , "EN-ca-X-CA", "en-CA-x-CA") 
+  , ("rule base" , "SGN-be-fr", "sgn-BE-FR") 
+  , ("rule base" , "Az-lATN-x-latn", "az-Latn-x-latn") 
+  , ("rule base" , "Az-lATN-x-LATN", "az-Latn-x-LATN") 
+  ]
+
+spec_format = do
+  before getContext $ do
+    describe "format" $ do
+      makeIts testformat
+  where 
+    makeIts dada  = foldl1 (>>) $ fmap it_ dada 
+    it_ (desc, input, exp)
+      = it (desc ++ " : " ++ input ++ " -> " ++ exp) $ \ctc -> format (read input :: LanguageTag) `shouldBe` exp
+ 
+-- spec_ isDuplicateVariant = do
+--   before getContext $ do
+--     describe "isDuplicateVariant" $ do
+--      it "aa-bb-cc" $ \_-> isDuplicate ["aa", "bb", "cc"] `shouldBe` False
+--      it "empty" $ \_-> isDuplicate ([] :: [String]) `shouldBe` False
+--      it "aa" $ \_-> isDuplicate ["aa"] `shouldBe` False
+--      it "aa-bb-aa" $ \_-> isDuplicate ["aa", "bb", "aa"] `shouldBe` True
+
+
+{-
+  , ("Tags that use extensions 2",  
+     pLangtag, "zh-CN-a-myext-x-private"
+    ,Langtag (ISO639 "zh" []) Nothing (Just "CN") [] ["myext"] ["private"])
+-}
 
 makeIts dada check = foldl1 (>>) $ fmap it_ dada 
   where
@@ -232,10 +389,14 @@ makeIts dada check = foldl1 (>>) $ fmap it_ dada
       = it casedesc $ \ctc -> check myparser input
                          `shouldBe`
                        expected
-
+  
 testStrList p inp = either (\x -> ["error"]) id (parseOnly p inp)
 testStr p inp = either (\x -> "error") id (parseOnly p inp)
+testStr' p inp = either (show) id (parseOnly p inp)
 testChar p inp = either (\x -> '@') id (parseOnly p inp)
 testWithError p inp = either (\x -> error "error!!") id (parseOnly p inp)
+testError p inp = either id (\x -> error "error!!") (parseOnly p inp) 
 
+testCharStr p inp = either (\x -> ('E',"error")) id (parseOnly p inp)
+testCharStrList p inp = either (\x -> [('E',"error")]) id (parseOnly p inp)
 
