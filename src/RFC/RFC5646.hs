@@ -13,14 +13,22 @@ https://tools.ietf.org/html/rfc5646
 
 == Features
 
-* Lens-enabled
-* instance of Read class
-  *  use readMaby
-* instance of Eq class
-  * case insensitive equality
-* support for common convention formatting
-* check if a tag is valid
-* check if a tag is private
+  * Lens-enabled
+  * instance of Read class
+
+      * use readMaby
+
+  * instance of Eq class
+
+      * case insensitive equality
+
+  * support for common convention formatting
+
+
+  * check if a tag is valid
+
+
+  * check if a tag is private
 
 == Basic usage :
 

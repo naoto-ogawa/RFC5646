@@ -117,8 +117,14 @@ LanguageTag
    | Grandfathered 
 -}
 
+-- | 
 data Language = 
-    ISO639 {_primary :: String, _extended :: [String]} 
+    ISO639 { 
+          -- | [Primary Language Subtag](https://tools.ietf.org/html/rfc5646#section-2.2.1)
+          _primary :: String      
+          -- | [Extended Language Subtags](https://tools.ietf.org/html/rfc5646#section-2.2.2)
+        , _extended :: [String]   
+        } 
   | Resv String
   | LangSubtag String
   deriving (Show)
@@ -138,13 +144,19 @@ instance Eq Language where
   LangSubtag x == LangSubtag y = eqStringCI x y
   ISO639 x1 x2 == ISO639 y1 y2 = eqStringCI x1 y1 && eqStringListCI x2 y2
   _            == _            = False
- 
+
+-- | Langtag
 data Langtag = Langtag {
     _language   :: Language
-  , _script     :: Maybe String
+  -- | [Script Subtag](https://tools.ietf.org/html/rfc5646#section-2.2.3) 
+  , _script     :: Maybe String 
+  -- | [Region Subtag](https://tools.ietf.org/html/rfc5646#section-2.2.4)
   , _region     :: Maybe String
+  -- | [Variant Subtags](https://tools.ietf.org/html/rfc5646#section-2.2.5)
   , _variant    :: [String]
+  -- | [Extension Subtags](https://tools.ietf.org/html/rfc5646#section-2.2.6)
   , _extension  :: [(Char, String)]
+  -- | [Private Use Subtags](https://tools.ietf.org/html/rfc5646#section-2.2.7)
   , _privateuse :: [String] 
   }
   deriving (Show)
@@ -178,10 +190,15 @@ instance Eq Langtag where
         then and $ zipWith eqExtension x y
         else False 
 
+-- | Language-Tag
+-- | prism enabled.
 data LanguageTag =
-    Normal Langtag
-  | Private [String]
-  | Grandfathered String
+  -- | normal language tags
+    Normal Langtag       
+  -- | [Private Use Subtags](https://tools.ietf.org/html/rfc5646#section-2.2.7)
+  | Private [String]    
+    -- | [Grandfathered and Redundant Registrations](https://tools.ietf.org/html/rfc5646#section-2.2.8)
+  | Grandfathered String 
   deriving (Show)
 
 makePrisms ''LanguageTag
