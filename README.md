@@ -8,7 +8,6 @@ A parser of [RFC5646](https://tools.ietf.org/html/rfc5646) in Haskell.
    <li>Lens-enabled</li>
    <li>instance of Read class<ul><li>use readMaby</li></ul></li>
    </ul>
-   
    <ul>
    <li>instance of Eq class<ul><li>case insensitive
    equality</li></ul></li>
