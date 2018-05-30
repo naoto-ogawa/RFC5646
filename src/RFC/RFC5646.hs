@@ -160,6 +160,24 @@ Just (Normal (Langtag {_language = ISO639 {_primary = "qaa", _extended = []}, _s
 >>> readMaybe "abcdefg" :: Maybe LanguageTag
 Nothing
 
+== Validity : 
+
+>>> eitherValid "a-b-c"
+Left "parse error : a-b-c"
+
+=== duplication check
+
+>>> isValid $ read "xxx-xxxxx"
+True
+>>> isValid $ read "xxx-xxxxx-xxxxx"
+False
+
+>>> isValid $ read "xxx-a-xxxxx-b-xxxxx"
+True
+>>> isValid $ read "xxx-a-xxxxx-a-xxxxx"
+False
+
+
 -}
 
 {-# LANGUAGE
@@ -170,13 +188,16 @@ Nothing
 
 module RFC.RFC5646 (
     LanguageTag(..)
-  , Language(..)
   , Langtag(..)
+  , Language(..)
   , isPrivateOfPrimaryLanguageSubtag 
   -- | uniquness
-  , isDuplicate
   , isDuplicateVariant
   , isDuplicateExtension
+  -- | validity
+  , isValidString
+  , eitherValid
+  , isValid
 ) where 
 
 import RFC.Internal.RFC5646

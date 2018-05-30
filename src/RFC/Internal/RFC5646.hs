@@ -24,6 +24,7 @@ import Data.Attoparsec.ByteString.Char8
 import qualified Data.Attoparsec.Internal.Types as T
 import Data.ByteString.Char8 as BC (pack, unpack)
 import Data.List
+import Text.Read (readMaybe)
 
 -- TODO test validity check and doctest
 --
@@ -450,25 +451,54 @@ isPrivateOfRegion'  :: String -> Bool
 isPrivateOfRegion'  = pBoolParse pPrivateOfRegion
 
 --
+-- Read instance
+--
+instance Read Langtag where
+  readsPrec _ input = _readEihter readLangtagEither input
+
+instance Read Language where
+  readsPrec _ input = _readEihter readLanguageEither input
+
+instance Read LanguageTag where
+  readsPrec _ input = _readEihter readLanguageTagEither input
+
+--
 -- well-formedness
 --
+
+-- | check well-formdness and duplications.
 isValidString :: String -> Bool
 isValidString = _either2Bool . readLanguageTagEither'
 
-eitherValid :: LanguageTag -> Either String LanguageTag
-eitherValid tag =  
+-- | check well-formdness and duplications.
+eitherValid' :: LanguageTag -> Either String LanguageTag
+eitherValid' tag =  
   if isDuplicateVariant tag 
   then Left $ "Duplicata Variant : " ++ (show tag) 
   else if isDuplicateExtension tag 
        then Left $ "Duplicata Extension : " ++ (show tag) 
        else Right tag 
 
-isValid :: LanguageTag -> Bool 
-isValid = _either2Bool . eitherValid
+-- | check well-formdness and duplications. [Classes of Conformance](https://tools.ietf.org/html/rfc5646#section-2.2.9)
+eitherValid :: String -> Either String LanguageTag
+eitherValid input =  
+  case tag of 
+    Nothing -> Left $ "parse error : " ++ input
+    Just x  -> eitherValid' x 
+  where 
+    tag = readMaybe input
 
+-- | check well-formdness and duplications.
+isValid :: LanguageTag -> Bool 
+isValid = _either2Bool . eitherValid'
+
+-- | check variant duplication 
+-- | There are no duplicate variant subtags.
 isDuplicateVariant :: LanguageTag -> Bool
 isDuplicateVariant lan = lan ^. (_Normal . variant) & isDuplicate 
 
+-- | check variant extension 
+-- | There are no duplicate singleton (extension) subtags.
 isDuplicateExtension :: LanguageTag -> Bool
 isDuplicateExtension lan = lan ^. (_Normal . extension) & isDuplicate 
 
@@ -513,15 +543,6 @@ isDuplicate = any check . tails
     check []      = False
     check (x:xs) = x `elem` xs
 
-instance Read Langtag where
-  readsPrec _ input = _readEihter readLangtagEither input
-
-instance Read Language where
-  readsPrec _ input = _readEihter readLanguageEither input
-
-instance Read LanguageTag where
-  readsPrec _ input = _readEihter readLanguageTagEither input
-
 readLanguageEither    = parseOnly pLanguage    . pack
 
 readLangtagEither     = parseOnly pLangtag     . pack
@@ -531,7 +552,7 @@ readLanguageTagEither = parseOnly pLanguageTag . pack
 readLanguageTagEither' input =
   case readLanguageTagEither input of
     Left  x -> Left x 
-    Right x -> eitherValid x
+    Right x -> eitherValid' x
 
 _readEihter myReader input = 
   case myReader input of
