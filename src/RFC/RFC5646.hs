@@ -149,7 +149,7 @@ Just "Hans"
 >>> c2' ^. region
 Just "CN"
 
-== Safty :
+== Safety :
 
 The read function is not safe, so use readMaybe
 
