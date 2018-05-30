@@ -2,8 +2,6 @@
 
 A parser of [RFC5646](https://tools.ietf.org/html/rfc5646) in Haskell. 
 
-   <a>https://tools.ietf.org/html/rfc5646</a>
-   
    <h2>Features</h2>
    
    <ul>
@@ -199,7 +197,7 @@ A parser of [RFC5646](https://tools.ietf.org/html/rfc5646) in Haskell.
    Just "CN"
    </pre>
    
-   <h2>Safty :</h2>
+   <h2>Safety :</h2>
    
    The read function is not safe, so use readMaybe
    
