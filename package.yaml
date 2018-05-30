@@ -32,17 +32,7 @@ library:
     - mtl
   exposed-modules:
     - RFC.RFC5646
-
-# executables:
-#   RFC5646-exe:
-#     main:                Main.hs
-#     source-dirs:         app
-#     ghc-options:
-#     - -threaded
-#     - -rtsopts
-#     - -with-rtsopts=-N
-#     dependencies:
-#     - RFC5646
+#    - RFC.Internal.RFC5646
 
 tests:
   RFC5646-test:
